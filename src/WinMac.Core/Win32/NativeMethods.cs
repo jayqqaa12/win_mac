@@ -14,6 +14,7 @@ public static partial class NativeMethods
     public const uint EVENT_SYSTEM_DIALOGOPEN = 0x0019;
     public const uint EVENT_OBJECT_DESTROY = 0x8001;
     public const uint WINEVENT_OUTOFCONTEXT = 0x0000;
+    public const uint OBJID_WINDOW = 0x00000000;
 
     public delegate void WinEventDelegate(nint hWinEventHook, uint eventType, nint hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
 
@@ -191,4 +192,138 @@ public static partial class NativeMethods
             if (key != nint.Zero) RegCloseKey(key);
         }
     }
+
+    // ---- M5：进程 exe 路径 / 真实图标提取 ----
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern nint OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
+
+    [DllImport("kernel32.dll")]
+    public static extern bool CloseHandle(nint hObject);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern uint QueryFullProcessImageName(nint hProcess, uint dwFlags, StringBuilder lpExeName, ref uint lpdwSize);
+
+    public const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
+
+    /// <summary>从窗口句柄解析其所属进程的 exe 完整路径；失败返回 null。</summary>
+    public static string? GetProcessPathFromWindow(nint hwnd)
+    {
+        uint pid;
+        GetWindowThreadProcessId(hwnd, out pid);
+        if (pid == 0)
+            return null;
+
+        nint proc = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
+        if (proc == nint.Zero)
+            return null;
+        try
+        {
+            uint size = 1024;
+            var sb = new StringBuilder((int)size);
+            return QueryFullProcessImageName(proc, 0, sb, ref size) ? sb.ToString() : null;
+        }
+        finally
+        {
+            CloseHandle(proc);
+        }
+    }
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    public static extern nint ExtractIconEx(string lpszFile, int nIconIndex, out nint phiconLarge, out nint phiconSmall, uint nIcons);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool DestroyIcon(nint hIcon);
+
+    [DllImport("user32.dll")]
+    public static extern bool GetIconInfo(nint hIcon, out ICONINFO piconinfo);
+
+    public const uint IMAGE_ICON = 0x00000001;
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ICONINFO
+    {
+        public bool fIcon;
+        public uint xHotspot;
+        public uint yHotspot;
+        public nint hbmMask;
+        public nint hbmColor;
+    }
+
+    [DllImport("user32.dll")]
+    public static extern nint CreateCompatibleDC(nint hdc);
+
+    [DllImport("user32.dll")]
+    public static extern bool DeleteDC(nint hdc);
+
+    [DllImport("gdi32.dll")]
+    public static extern nint SelectObject(nint hdc, nint h);
+
+    [DllImport("gdi32.dll")]
+    public static extern bool DeleteObject(nint h);
+
+    [DllImport("gdi32.dll")]
+    public static extern nint CreateCompatibleBitmap(nint hdc, int width, int height);
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct BITMAPINFOHEADER
+    {
+        public uint biSize;
+        public int biWidth;
+        public int biHeight;
+        public ushort biPlanes;
+        public ushort biBitCount;
+        public uint biCompression;
+        public uint biSizeImage;
+        public int biXPelsPerMeter;
+        public int biYPelsPerMeter;
+        public uint biClrUsed;
+        public uint biClrImportant;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct BITMAPINFO
+    {
+        public BITMAPINFOHEADER bmiHeader;
+        public uint bmiColors0;
+    }
+
+    [DllImport("gdi32.dll")]
+    public static extern int GetDIBits(nint hdc, nint hbm, uint start, uint cLines, byte[]? lpvBits, ref BITMAPINFO lpbmi, uint usage);
+
+    // ---- M5：真实图标 → 32bpp DIB → BGRA 像素 ----
+    [DllImport("user32.dll")]
+    public static extern nint GetDC(nint hwnd);
+
+    [DllImport("user32.dll")]
+    public static extern int ReleaseDC(nint hwnd, nint hdc);
+
+    [DllImport("gdi32.dll")]
+    public static extern nint CreateDIBSection(nint hdc, ref BITMAPINFO pbmi, uint usage, out nint ppvBits, nint hSection, uint offset);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    public static extern bool DrawIconEx(nint hdc, int xLeft, int yTop, nint hIcon, int cxWidth, int cyWidth, uint istepIfAniCur, nint hbrFlickerFreeDraw, uint diFlags);
+
+    public const uint DIB_RGB_COLORS = 0;
+    public const uint DI_NORMAL = 0x0003;
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MSG
+    {
+        public nint hwnd;
+        public uint message;
+        public nint wParam;
+        public nint lParam;
+        public uint time;
+        public int ptX;
+        public int ptY;
+    }
+
+    [DllImport("user32.dll")]
+    public static extern int GetMessage(out MSG lpMsg, nint hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
+
+    [DllImport("user32.dll")]
+    public static extern uint GetCurrentThreadId();
+
+    [DllImport("user32.dll")]
+    public static extern bool PostThreadMessage(uint idThread, uint msg, nint wParam, nint lParam);
 }

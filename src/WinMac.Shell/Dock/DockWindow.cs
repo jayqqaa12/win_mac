@@ -35,6 +35,7 @@ public sealed class DockWindow : Window
 
     private readonly AppConfig _config;
     private readonly TaskMonitor _monitor;
+    private readonly IconCache _icons = new();
     private readonly Canvas _root;
     private readonly List<DockIconView> _views = new();
     private readonly Dictionary<DockIconView, TaskWindow> _map = new();
@@ -176,7 +177,9 @@ public sealed class DockWindow : Window
         {
             if (current.ContainsKey(hwnd))
                 continue;
-            var view = new DockIconView(task.Title, AccentColor(task));
+            // 真实图标：以 exe 路径取（缓存在 IconCache），提取失败为 null 时回退字母块。
+            var icon = task.ProcessPath is not null ? _icons.Get(task.ProcessPath) : null;
+            var view = new DockIconView(task.Title, AccentColor(task), icon);
             view.Width = _config.DockIconSize;
             view.Height = _config.DockIconSize;
             view.Clicked += OnIconClicked;

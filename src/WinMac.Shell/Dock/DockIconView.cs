@@ -7,7 +7,8 @@ using Windows.UI.Text;
 namespace WinMac.Shell.Dock;
 
 /// <summary>
-/// Dock 中的单个图标项：圆角色块 + 首字符 + 底部运行指示点。
+/// Dock 中的单个图标项：真实应用图标 + 底部运行指示点 + 前台高亮边框。
+/// 无真实图标时退化为“圆角色块 + 首字符”。
 /// 纯代码构造（避免额外 XAML 资源），放大镜只改 <see cref="UserControl.Width/Height"/>，
 /// 由 <see cref="DockWindow"/> 用 Canvas 布局驱动。
 /// </summary>
@@ -18,7 +19,7 @@ public sealed class DockIconView : UserControl
     private readonly Border _dot;
     private readonly Border _highlight;
 
-    public DockIconView(string title, Color accent)
+    public DockIconView(string title, Color accent, ImageSource? icon = null)
     {
         _icon = new Border
         {
@@ -38,6 +39,8 @@ public sealed class DockIconView : UserControl
             VerticalAlignment = VerticalAlignment.Center,
             IsHitTestVisible = false,
         };
+        if (icon is not null)
+            _initial.Visibility = Visibility.Collapsed; // 用真实图标时隐藏首字符兜底。
 
         _dot = new Border
         {
@@ -66,6 +69,14 @@ public sealed class DockIconView : UserControl
         grid.Children.Add(_icon);
         grid.Children.Add(_highlight);
         grid.Children.Add(_initial);
+        if (icon is not null)
+        {
+            grid.Children.Add(new Border
+            {
+                Child = new Image { Source = icon, Stretch = Stretch.Uniform },
+                Margin = new Thickness(8),
+            });
+        }
         grid.Children.Add(_dot);
         Content = grid;
 
