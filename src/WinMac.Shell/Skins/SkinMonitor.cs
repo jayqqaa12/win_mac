@@ -18,12 +18,15 @@ public static class SkinMonitors
     {
         var list = new List<SkinMonitor>();
         int index = 0;
-        NativeMethods.EnumDisplayMonitors(nint.Zero, nint.Zero, (_, _, monitor, _) =>
+
+        bool Callback(nint hMonitor, nint hdcMonitor, ref NativeMethods.RECT lprcMonitor, nint lParam)
         {
-            list.Add(new SkinMonitor(index, monitor));
+            list.Add(new SkinMonitor(index, lprcMonitor));
             index++;
             return true;
-        }, nint.Zero);
+        }
+
+        NativeMethods.EnumDisplayMonitors(nint.Zero, nint.Zero, Callback, nint.Zero);
         if (list.Count == 0)
         {
             // 兜底：退化为主屏虚拟 1920x1080，避免空列表导致皮肤无宿主窗口。

@@ -62,7 +62,11 @@ public sealed class SkinHostWindow : Window
             Height = monitor.Height,
             Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent),
         };
-        Content = new Grid { Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent), Child = _root };
+        Content = new Grid
+        {
+            Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent),
+            Children = { _root },
+        };
 
         foreach (var entry in _entries())
         {
