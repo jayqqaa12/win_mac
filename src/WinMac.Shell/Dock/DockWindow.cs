@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Windows.Foundation;
 using Windows.Graphics;
 using Windows.UI;
 using WinMac.Core.Configuration;
@@ -67,7 +68,7 @@ public sealed class DockWindow : Window
         _root.PointerExited += OnRootPointerExited;
         Content = _root;
 
-        _tooltipText = new TextBlock { FontSize = 12, Foreground = new SolidColorBrush(Colors.White) };
+        _tooltipText = new TextBlock { FontSize = 12, Foreground = new SolidColorBrush(Microsoft.UI.Colors.White) };
         _tooltip = new Border
         {
             Child = _tooltipText,
@@ -78,7 +79,7 @@ public sealed class DockWindow : Window
             IsHitTestVisible = false,
             Visibility = Visibility.Collapsed,
         };
-        Panel.SetZIndex(_tooltip, 1000);
+        Canvas.SetZIndex(_tooltip, 1000);
         _root.Children.Add(_tooltip);
 
         // 左侧固定的“启动台”触发按钮（不参与放大镜布局）。
@@ -214,21 +215,22 @@ public sealed class DockWindow : Window
         double x = c * (1 - Math.Abs((h / 60) % 2 - 1));
         double m = l - c / 2;
         double r, g, b;
-        (r, g, b) = h switch
+        var rgb = h switch
         {
-            < 60 => (c, x, 0),
-            < 120 => (x, c, 0),
-            < 180 => (0, c, x),
-            < 240 => (0, x, c),
-            < 300 => (x, 0, c),
-            _ => (c, 0, x),
+            < 60 => (c, x, 0d),
+            < 120 => (x, c, 0d),
+            < 180 => (0d, c, x),
+            < 240 => (0d, x, c),
+            < 300 => (x, 0d, c),
+            _ => (c, 0d, x),
         };
+        (r, g, b) = rgb;
         return (r + m, g + m, b + m);
     }
 
     private readonly record struct HslState(double H, double S, double L);
 
-    private void OnIconClicked(DockIconView view, DockIconView source)
+    private void OnIconClicked(object sender, DockIconView view)
     {
         if (!_map.TryGetValue(view, out var task))
             return;
@@ -294,9 +296,10 @@ public sealed class DockWindow : Window
     }
 
     // ---- 右键菜单 ----
-    private void OnIconRightTapped(DockIconView view, RightTappedRoutedEventArgs e)
+    private void OnIconRightTapped(object sender, RightTappedRoutedEventArgs e)
     {
-        if (!_map.TryGetValue(view, out var task))
+        var view = sender as DockIconView;
+        if (view is null || !_map.TryGetValue(view, out var task))
             return;
 
         var menu = new MenuFlyout();

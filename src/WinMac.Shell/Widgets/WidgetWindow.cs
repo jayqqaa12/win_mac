@@ -265,7 +265,7 @@ public sealed class WidgetWindow : Window
                 Foreground = new SolidColorBrush(Color.FromArgb(255, 150, 150, 156)),
                 HorizontalAlignment = HorizontalAlignment.Center,
             });
-            Grid.SetColumn(grid.Children[^1], c);
+            Grid.SetColumn((FrameworkElement)grid.Children[^1], c);
         }
 
         int firstDay = (int)new DateTime(now.Year, now.Month, 1).DayOfWeek;
@@ -286,12 +286,26 @@ public sealed class WidgetWindow : Window
                     ? new SolidColorBrush(Microsoft.UI.Colors.White)
                     : new SolidColorBrush(Color.FromArgb(255, 200, 200, 204)),
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Background = day == now.Day ? new SolidColorBrush(Color.FromArgb(255, 0, 122, 255)) : null,
-                Padding = new Thickness(0, 3, 0, 3),
             };
-            grid.Children.Add(tb);
-            Grid.SetColumn(tb, (firstDay + day - 1) % 7);
-            Grid.SetRow(tb, row);
+
+            FrameworkElement cell = tb;
+            if (day == now.Day)
+            {
+                cell = new Border
+                {
+                    Background = new SolidColorBrush(Color.FromArgb(255, 0, 122, 255)),
+                    CornerRadius = new CornerRadius(9),
+                    MinWidth = 22,
+                    MinHeight = 22,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Child = tb,
+                };
+            }
+
+            grid.Children.Add(cell);
+            Grid.SetColumn(cell, (firstDay + day - 1) % 7);
+            Grid.SetRow(cell, row);
         }
 
         var stack = new StackPanel();

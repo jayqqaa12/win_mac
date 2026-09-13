@@ -227,18 +227,19 @@ public sealed class LaunchpadWindow : Window
         }
         // 稳定色相，中等饱和/亮度，白色字母可读。
         double hue = h % 360;
-        double c = 0.55;
-        double x = c * (1 - Math.Abs((hue / 60) % 2 - 1));
+        double sat = 0.55;
+        double x = sat * (1 - Math.Abs((hue / 60) % 2 - 1));
         double r, g, b;
-        (r, g, b) = hue switch
+        var rgb = hue switch
         {
-            < 60 => (c, x, 0),
-            < 120 => (x, c, 0),
-            < 180 => (0, c, x),
-            < 240 => (0, x, c),
-            < 300 => (x, 0, c),
-            _ => (c, 0, x),
+            < 60 => (sat, x, 0d),
+            < 120 => (x, sat, 0d),
+            < 180 => (0d, sat, x),
+            < 240 => (0d, x, sat),
+            < 300 => (x, 0d, sat),
+            _ => (sat, 0d, x),
         };
+        (r, g, b) = rgb;
         double m = 0.18;
         return Color.FromArgb(255,
             (byte)Math.Round((r + m) * 255),
