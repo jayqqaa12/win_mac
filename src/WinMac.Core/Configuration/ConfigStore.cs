@@ -21,6 +21,12 @@ public sealed class AppConfig
     /// <summary>隐藏模式：Always / AutoHide / SmartHide。</summary>
     public string DockHideMode { get; set; } = "Always";
 
+    /// <summary>Dock 固定启动项：exe 全路径列表（拖入 exe/快捷方式加入，从右键菜单移除）。</summary>
+    public List<string> DockPinnedItems { get; set; } = new();
+
+    /// <summary>Dock 格子的显示顺序键（exe 路径），用于拖拽换序后在重启时保持。</summary>
+    public List<string> DockOrder { get; set; } = new();
+
     /// <summary>桌面小组件（时钟/CPU/内存/日历）是否启用。</summary>
     public bool WidgetsEnabled { get; set; } = true;
 
