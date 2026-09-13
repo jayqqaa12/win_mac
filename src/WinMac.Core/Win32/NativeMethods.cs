@@ -4,7 +4,7 @@ using System.Text;
 namespace WinMac.Core.Win32;
 
 /// <summary>本程序所需的 Win32 P/Invoke 全集。随功能新增持续补充。</summary>
-internal static partial class NativeMethods
+public static partial class NativeMethods
 {
     // ---- 窗口枚举 / 信息 ----
     public const uint EVENT_SYSTEM_FOREGROUND = 0x0003;

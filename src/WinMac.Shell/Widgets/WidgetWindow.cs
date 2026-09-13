@@ -148,7 +148,8 @@ public sealed class WidgetWindow : Window
         stack.Children.Add(time);
         stack.Children.Add(date);
 
-        var timer = new DispatcherQueueTimer { Interval = TimeSpan.FromSeconds(1) };
+        var timer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        timer.Interval = TimeSpan.FromSeconds(1);
         timer.Tick += (_, _) =>
         {
             time.Text = DateTime.Now.ToString("HH:mm");
@@ -182,7 +183,8 @@ public sealed class WidgetWindow : Window
         stack.Children.Add(bar);
 
         var sampler = new SystemSampler();
-        var timer = new DispatcherQueueTimer { Interval = TimeSpan.FromSeconds(2) };
+        var timer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        timer.Interval = TimeSpan.FromSeconds(2);
         timer.Tick += (_, _) =>
         {
             var s = sampler.Sample();
@@ -220,7 +222,8 @@ public sealed class WidgetWindow : Window
         stack.Children.Add(bar);
 
         var sampler = new SystemSampler();
-        var timer = new DispatcherQueueTimer { Interval = TimeSpan.FromSeconds(2) };
+        var timer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        timer.Interval = TimeSpan.FromSeconds(2);
         timer.Tick += (_, _) =>
         {
             var s = sampler.Sample();
