@@ -12,7 +12,7 @@ public readonly record struct SkinMonitor(int Index, NativeMethods.RECT WorkArea
 }
 
 /// <summary>枚举所有显示器，供 Dock/皮肤跨屏定位。</summary>
-public static class SkinMonitor
+public static class SkinMonitors
 {
     public static List<SkinMonitor> GetMonitors()
     {

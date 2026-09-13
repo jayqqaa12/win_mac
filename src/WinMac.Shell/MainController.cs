@@ -64,7 +64,7 @@ public sealed class MainController
             ConfigStore.Save(_config);
         }
 
-        foreach (var monitor in SkinMonitor.GetMonitors())
+        foreach (var monitor in SkinMonitors.GetMonitors())
         {
             var host = new SkinHostWindow(
                 _config,
