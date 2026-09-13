@@ -9,7 +9,7 @@ using WinMac.Core.Win32;
 
 namespace WinMac.Shell.Widgets;
 
-public enum WidgetKind { Clock, Cpu, Mem, Calendar }
+public enum WidgetKind { Clock, Cpu, Mem, Calendar, Stock }
 
 /// <summary>
 /// 桌面小组件窗口：无边框、可拖拽、深色半透明卡片。
@@ -124,6 +124,7 @@ public sealed class WidgetWindow : Window
             WidgetKind.Cpu => BuildCpu(out width, out height),
             WidgetKind.Mem => BuildMem(out width, out height),
             WidgetKind.Calendar => BuildCalendar(out width, out height),
+            WidgetKind.Stock => BuildStock(out width, out height),
             _ => (BuildClock(out width, out height)),
         };
     }
@@ -316,4 +317,115 @@ public sealed class WidgetWindow : Window
         root.Children.Add(stack);
         return root;
     }
-}
+
+    private static FrameworkElement BuildStock(out double w, out double h)
+    {
+        w = 236; h = 214;
+        var dq = DispatcherQueue.GetForCurrentThread();
+        var svc = new StockQuoteService();
+
+        var header = new TextBlock
+        {
+            Text = "股市",
+            FontSize = 14,
+            FontWeight = new Windows.UI.Text.FontWeight { Weight = 600 },
+            Foreground = new SolidColorBrush(Microsoft.UI.Colors.White),
+        };
+
+        var panel = new StackPanel { Spacing = 2, Margin = new Thickness(0, 8, 0, 0) };
+        // 每行保存价格/涨跌两个文本，刷新时按代码回填。
+        var rows = new List<(TextBlock Price, TextBlock Change)>();
+
+        foreach (var (code, name) in StockQuoteService.DefaultWatchlist)
+        {
+            (TextBlock Price, TextBlock Change) tb = MakeRow(name, code, panel);
+            rows.Add(tb);
+        }
+
+        var stack = new StackPanel();
+        stack.Children.Add(header);
+        stack.Children.Add(panel);
+
+        // 每 10s 拉取一次实时行情；跨线程回填到 UI。
+        var timer = dq.CreateTimer();
+        timer.Interval = TimeSpan.FromSeconds(10);
+        timer.Tick += async (_, _) =>
+        {
+            var quotes = await svc.GetQuotesAsync();
+            dq.TryEnqueue(() => ApplyQuotes(rows, quotes));
+        };
+        timer.Start();
+
+        var root = new Grid();
+        root.Children.Add(stack);
+        return root;
+    }
+
+    private static (TextBlock Price, TextBlock Change) MakeRow(string name, string code, StackPanel panel)
+    {
+        var nameTb = new TextBlock
+        {
+            Text = name,
+            FontSize = 14,
+            Foreground = new SolidColorBrush(Microsoft.UI.Colors.White),
+            TextTrimming = TextTrimming.CharacterEllipsis,
+        };
+        var codeTb = new TextBlock
+        {
+            Text = code.ToUpperInvariant(),
+            FontSize = 10.5,
+            Foreground = new SolidColorBrush(Color.FromArgb(255, 150, 150, 156)),
+        };
+        var left = new StackPanel { Spacing = 0 };
+        left.Children.Add(nameTb);
+        left.Children.Add(codeTb);
+
+        var priceTb = new TextBlock
+        {
+            Text = "--",
+            FontSize = 15,
+            FontWeight = new Windows.UI.Text.FontWeight { Weight = 600 },
+            Foreground = new SolidColorBrush(Microsoft.UI.Colors.White),
+            HorizontalAlignment = HorizontalAlignment.Right,
+        };
+        var changeTb = new TextBlock { Text = "—", FontSize = 12, HorizontalAlignment = HorizontalAlignment.Right };
+        var right = new StackPanel { Spacing = 0, VerticalAlignment = VerticalAlignment.Center };
+        right.Children.Add(priceTb);
+        right.Children.Add(changeTb);
+
+        var row = new Grid { ColumnSpacing = 8 };
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        row.Children.Add(left);
+        Grid.SetColumn(left, 0);
+        row.Children.Add(right);
+        Grid.SetColumn(right, 1);
+
+        panel.Children.Add(row);
+        return (priceTb, changeTb);
+    }
+
+    private static void ApplyQuotes(IReadOnlyList<(TextBlock Price, TextBlock Change)> rows,
+        List<StockQuote> quotes)
+    {
+        var byCode = quotes.ToDictionary(q => q.Code);
+        int n = Math.Min(rows.Count, StockQuoteService.DefaultWatchlist.Count);
+        for (int i = 0; i < n; i++)
+        {
+            var (priceTb, changeTb) = rows[i];
+            string code = StockQuoteService.DefaultWatchlist[i].Code;
+            if (!byCode.TryGetValue(code, out var q))
+                continue;
+
+            priceTb.Text = q.Price.ToString("F2");
+
+            string sign = q.Change > 0 ? "+" : (q.Change < 0 ? "-" : "");
+            changeTb.Text = $"{sign}{Math.Abs(q.Change):F2}  {sign}{Math.Abs(q.ChangePct):F2}%";
+            changeTb.Foreground = new SolidColorBrush(q.Change switch
+            {
+                > 0 => Color.FromArgb(255, 224, 49, 51),   // 红涨
+                < 0 => Color.FromArgb(255, 0, 168, 84),    // 绿跌
+                _ => Color.FromArgb(255, 190, 190, 196),   // 平
+            });
+        }
+    }
