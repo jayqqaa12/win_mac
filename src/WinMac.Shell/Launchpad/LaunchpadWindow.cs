@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Windows.System;
+using Windows.UI;
 using Windows.UI.Text;
 using WinMac.Core.Services;
 using WinMac.Core.Win32;
@@ -58,7 +59,7 @@ public sealed class LaunchpadWindow : Window
             Text = "启动台",
             FontSize = 36,
             FontWeight = new Windows.UI.Text.FontWeight { Weight = 600 },
-            Foreground = new SolidColorBrush(Colors.White),
+            Foreground = new SolidColorBrush(Microsoft.UI.Colors.White),
             HorizontalAlignment = HorizontalAlignment.Center,
         });
         header.Children.Add(_search);
@@ -142,7 +143,7 @@ public sealed class LaunchpadWindow : Window
             _rows.Children.Add(new TextBlock
             {
                 Text = "没有匹配的应用",
-                Foreground = new SolidColorBrush(Colors.Gray),
+                Foreground = new SolidColorBrush(Microsoft.UI.Colors.Gray),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(0, 48, 0, 0),
             });
@@ -169,7 +170,7 @@ public sealed class LaunchpadWindow : Window
         {
             Text = entry.Name,
             FontSize = 12,
-            Foreground = new SolidColorBrush(Colors.White),
+            Foreground = new SolidColorBrush(Microsoft.UI.Colors.White),
             TextAlignment = TextAlignment.Center,
             TextWrapping = TextWrapping.NoWrap,
             MaxWidth = 96,
@@ -189,7 +190,7 @@ public sealed class LaunchpadWindow : Window
                 Text = entry.Name.Length > 0 ? entry.Name[0].ToString().ToUpperInvariant() : "?",
                 FontSize = 22,
                 FontWeight = new Windows.UI.Text.FontWeight { Weight = 600 },
-                Foreground = new SolidColorBrush(Colors.White),
+                Foreground = new SolidColorBrush(Microsoft.UI.Colors.White),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
             },
