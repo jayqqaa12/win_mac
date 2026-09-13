@@ -201,7 +201,7 @@ public static partial class NativeMethods
     public static extern bool CloseHandle(nint hObject);
 
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    public static extern uint QueryFullProcessImageName(nint hProcess, uint dwFlags, StringBuilder lpExeName, ref uint lpdwSize);
+    public static extern bool QueryFullProcessImageName(nint hProcess, uint dwFlags, StringBuilder lpExeName, ref uint lpdwSize);
 
     public const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
 
