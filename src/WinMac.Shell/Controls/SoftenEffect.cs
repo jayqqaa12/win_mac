@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 
-namespace WinMac.UI.Controls;
+namespace WinMac.Shell.Controls;
 
 /// <summary>
 /// “柔化”的本质杠杆：把元素连同其子树栅格化为位图缓存(grayscale skyline AA)，

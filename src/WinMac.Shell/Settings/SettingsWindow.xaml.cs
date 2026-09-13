@@ -2,8 +2,9 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using WinMac.Core.Configuration;
+using WinMac.Core.Services;
 
-namespace WinMac.UI.Settings;
+namespace WinMac.Shell.Settings;
 
 public sealed partial class SettingsWindow : Window
 {
@@ -28,6 +29,15 @@ public sealed partial class SettingsWindow : Window
             "Dark" => "Dark",
             _ => "System",
         };
+        DockToggle.IsOn = _config.DockEnabled;
+        HideModeCombo.SelectedValue = _config.DockHideMode switch
+        {
+            "AutoHide" => "AutoHide",
+            "SmartHide" => "SmartHide",
+            _ => "Always",
+        };
+        WidgetsToggle.IsOn = _config.WidgetsEnabled;
+        AutoStartToggle.IsOn = _config.AutoStart;
         GammaSlider.Value = _config.TextGamma;
         ContrastSlider.Value = _config.TextContrast;
         SoftnessSlider.Value = _config.TextSoftness;
@@ -51,6 +61,10 @@ public sealed partial class SettingsWindow : Window
     {
         var def = new AppConfig();
         ThemeCombo.SelectedValue = "System";
+        DockToggle.IsOn = def.DockEnabled;
+        HideModeCombo.SelectedValue = def.DockHideMode;
+        WidgetsToggle.IsOn = def.WidgetsEnabled;
+        AutoStartToggle.IsOn = def.AutoStart;
         GammaSlider.Value = def.TextGamma;
         ContrastSlider.Value = def.TextContrast;
         SoftnessSlider.Value = def.TextSoftness;
@@ -60,12 +74,17 @@ public sealed partial class SettingsWindow : Window
     private void OnSave(object sender, RoutedEventArgs e)
     {
         _config.Theme = (string)(ThemeCombo.SelectedValue ?? "System");
+        _config.DockEnabled = DockToggle.IsOn;
+        _config.DockHideMode = (string)(HideModeCombo.SelectedValue ?? "Always");
+        _config.WidgetsEnabled = WidgetsToggle.IsOn;
+        _config.AutoStart = AutoStartToggle.IsOn;
         _config.TextGamma = GammaSlider.Value;
         _config.TextContrast = ContrastSlider.Value;
         _config.TextSoftness = SoftnessSlider.Value;
 
         ConfigStore.Save(_config);
         ThemeManager.Apply(_config.Theme);
+        AutoStartService.SetEnabled(_config.AutoStart);
         Close();
     }
 }

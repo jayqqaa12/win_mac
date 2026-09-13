@@ -2,7 +2,7 @@ using Microsoft.UI.Xaml;
 using WinMac.Core.Configuration;
 using WinMac.Core.Services;
 
-namespace WinMac.UI.Settings;
+namespace WinMac.Shell.Settings;
 
 /// <summary>
 /// 应用当前主题到 <see cref="Application"/>。

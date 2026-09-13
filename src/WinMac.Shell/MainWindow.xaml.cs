@@ -1,8 +1,8 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using WinMac.Core.Configuration;
-using WinMac.UI.Controls;
-using WinMac.UI.Settings;
+using WinMac.Shell.Controls;
+using WinMac.Shell.Settings;
 
 namespace WinMac.Shell;
 

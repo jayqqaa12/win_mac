@@ -46,6 +46,108 @@ internal static partial class NativeMethods
 
     public const int SW_RESTORE = 9;
 
+    // ---- Dock：窗口枚举 / 置顶 / 无激活 dock 窗口样式 ----
+    public delegate bool EnumWindowsProc(nint hWnd, nint lParam);
+
+    [DllImport("user32.dll")]
+    public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, nint lParam);
+
+    [DllImport("user32.dll")]
+    public static extern bool IsWindowVisible(nint hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern bool SetForegroundWindow(nint hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern bool IsWindowEnabled(nint hWnd);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    public static extern int GetClassName(nint hWnd, StringBuilder lpClassName, int nMaxCount);
+
+    [DllImport("user32.dll")]
+    public static extern nint GetAncestor(nint hwnd, uint gaFlags);
+
+    public const uint GA_ROOTOWNER = 3;
+
+    [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW", CharSet = CharSet.Unicode)]
+    public static extern nint GetWindowLongPtr(nint hWnd, int nIndex);
+
+    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW", CharSet = CharSet.Unicode)]
+    public static extern nint SetWindowLongPtr(nint hWnd, int nIndex, nint dwNewLong);
+
+    [DllImport("user32.dll")]
+    public static extern bool SetWindowPos(nint hWnd, nint hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+
+    public static readonly nint HWND_TOPMOST = new(-1);
+    public static readonly nint HWND_NOTOPMOST = new(-2);
+
+    public const int GWL_EXSTYLE = -20;
+    public const long WS_EX_TOOLWINDOW = 0x00000080;
+    public const long WS_EX_NOACTIVATE = 0x08000000;
+    public const uint SWP_NOSIZE = 0x0001;
+    public const uint SWP_NOMOVE = 0x0002;
+    public const uint SWP_NOACTIVATE = 0x0010;
+
+    // ---- 帧率驱动的常驻叠加层（Dock）供电：隐藏原生标题栏装饰 ----
+    [StructLayout(LayoutKind.Sequential)]
+    public struct RECT
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [DllImport("user32.dll")]
+    public static extern bool GetWindowRect(nint hWnd, out RECT lpRect);
+
+    // ---- 系统资源采样（CPU / 内存） ----
+    [StructLayout(LayoutKind.Sequential)]
+    public struct FILETIME
+    {
+        public uint dwLowDateTime;
+        public uint dwHighDateTime;
+
+        public ulong ToUInt64() => ((ulong)dwHighDateTime << 32) | dwLowDateTime;
+    }
+
+    [DllImport("kernel32.dll")]
+    public static extern bool GetSystemTimes(out FILETIME lpIdleTime, out FILETIME lpKernelTime, out FILETIME lpUserTime);
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MEMORYSTATUSEX
+    {
+        public uint dwLength;
+        public uint dwMemoryLoad;
+        public ulong ullTotalPhys;
+        public ulong ullAvailPhys;
+        public ulong ullTotalPageFile;
+        public ulong ullAvailPageFile;
+        public ulong ullTotalVirtual;
+        public ulong ullAvailVirtual;
+        public ulong ullAvailExtendedVirtual;
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
+
+    // ---- 鼠标坐标 / 屏幕尺寸（AutoHide/SmartHide 用） ----
+    [StructLayout(LayoutKind.Sequential)]
+    public struct POINT
+    {
+        public int X;
+        public int Y;
+    }
+
+    [DllImport("user32.dll")]
+    public static extern bool GetCursorPos(out POINT lpPoint);
+
+    [DllImport("user32.dll")]
+    public static extern int GetSystemMetrics(int nIndex);
+
+    public const int SM_CXSCREEN = 0;
+    public const int SM_CYSCREEN = 1;
+
     // ---- 未打包自启动注册表 ----
     [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern int RegSetValueEx(nint hKey, string lpValueName, int reserved, int dwType, byte[] lpData, int cbData);

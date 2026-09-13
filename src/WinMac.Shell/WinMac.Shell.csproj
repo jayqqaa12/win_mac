@@ -31,7 +31,6 @@
   <ItemGroup>
     <ProjectReference Include="..\WinMac.Core\WinMac.Core.csproj" />
     <ProjectReference Include="..\WinMac.Text\WinMac.Text.csproj" />
-    <ProjectReference Include="..\WinMac.UI\WinMac.UI.csproj" />
   </ItemGroup>
 
 </Project>

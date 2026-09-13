@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using WinMac.Text;
 using Windows.UI.Text;
 
-namespace WinMac.UI.Controls;
+namespace WinMac.Shell.Controls;
 
 /// <summary>
 /// 应用 macOS 质感文字参数的文本控件封装。

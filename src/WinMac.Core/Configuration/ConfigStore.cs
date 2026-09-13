@@ -21,6 +21,9 @@ public sealed class AppConfig
     /// <summary>隐藏模式：Always / AutoHide / SmartHide。</summary>
     public string DockHideMode { get; set; } = "Always";
 
+    /// <summary>桌面小组件（时钟/CPU/内存/日历）是否启用。</summary>
+    public bool WidgetsEnabled { get; set; } = true;
+
     /// <summary>浅色 / 深色 / 跟随系统。</summary>
     public string Theme { get; set; } = "System";
 

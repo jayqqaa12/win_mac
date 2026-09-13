@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinMac.Core", "src\WinMac.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinMac.Text", "src\WinMac.Text\WinMac.Text.csproj", "{5B9E4A10-0001-4000-8000-000000000002}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinMac.UI", "src\WinMac.UI\WinMac.UI.csproj", "{5B9E4A10-0001-4000-8000-000000000004}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinMac.Shell", "src\WinMac.Shell\WinMac.Shell.csproj", "{5B9E4A10-0001-4000-8000-000000000003}"
 EndProject
 Global
@@ -28,10 +26,6 @@ Global
 		{5B9E4A10-0001-4000-8000-000000000003}.Debug|x64.Build.0 = Debug|x64
 		{5B9E4A10-0001-4000-8000-000000000003}.Release|x64.ActiveCfg = Release|x64
 		{5B9E4A10-0001-4000-8000-000000000003}.Release|x64.Build.0 = Release|x64
-		{5B9E4A10-0001-4000-8000-000000000004}.Debug|x64.ActiveCfg = Debug|x64
-		{5B9E4A10-0001-4000-8000-000000000004}.Debug|x64.Build.0 = Debug|x64
-		{5B9E4A10-0001-4000-8000-000000000004}.Release|x64.ActiveCfg = Release|x64
-		{5B9E4A10-0001-4000-8000-000000000004}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

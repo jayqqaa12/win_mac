@@ -3,7 +3,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Windows.Graphics;
 
-namespace WinMac.UI.Settings;
+namespace WinMac.Shell.Settings;
 
 /// <summary>把窗口居中到主显示区域(工作区)。</summary>
 public static class WindowPositioner
