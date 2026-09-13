@@ -229,7 +229,7 @@ public static partial class NativeMethods
     }
 
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
-    public static extern nint ExtractIconEx(string lpszFile, int nIconIndex, out nint phiconLarge, out nint phiconSmall, uint nIcons);
+    public static extern int ExtractIconEx(string lpszFile, int nIconIndex, out nint phiconLarge, out nint phiconSmall, uint nIcons);
 
     [DllImport("user32.dll", SetLastError = true)]
     public static extern bool DestroyIcon(nint hIcon);
