@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using Windows.Foundation;
 using Windows.Graphics;
 using Windows.UI;
@@ -36,10 +37,12 @@ public sealed class DockWindow : Window
     private readonly AppConfig _config;
     private readonly TaskMonitor _monitor;
     private readonly IconCache _icons = new();
+    private readonly ThumbnailHost _preview = new();
     private readonly Canvas _root;
     private readonly List<DockIconView> _views = new();
     private readonly Dictionary<DockIconView, TaskWindow> _map = new();
     private readonly List<(DockIconView view, double x1, double x2, double top)> _placed = new();
+    private readonly Dictionary<nint, bool> _prevIconic = new();
 
     private readonly Border _tooltip;
     private readonly TextBlock _tooltipText;
@@ -190,6 +193,75 @@ public sealed class DockWindow : Window
         }
 
         ReLayout(double.NegativeInfinity);
+
+        // 最小化 → 播放 genie 收纳动画（仅在状态翻转的时刻触发一次）。
+        foreach (var (hwnd, task) in desired)
+        {
+            bool iconic = task.IsIconic;
+            bool was = _prevIconic.GetValueOrDefault(hwnd);
+            _prevIconic[hwnd] = iconic;
+            if (iconic && !was)
+                PlayGenie(task);
+        }
+    }
+
+    // ---- M6：最小化 genie 收纳动画 ----
+    private void PlayGenie(TaskWindow task)
+    {
+        // 定位到对应图标槽位（放大后尺寸），从那里做缩小+淡出飞行。
+        var view = _views.FirstOrDefault(v => _map[v] == task);
+        if (view is null)
+            return;
+
+        var snap = WindowSnapshot.Capture(task.Hwnd);
+        if (snap is null)
+            return;
+
+        var slot = _placed.FirstOrDefault(p => p.view == view);
+        double cw = _root.ActualWidth > 0 ? _root.ActualWidth : _dockWidth;
+        double ch = _root.ActualHeight > 0 ? _root.ActualHeight : DockHeight;
+        double cx = slot.view is not null ? (slot.x1 + slot.x2) / 2 : cw / 2;
+        double cy = ch / 2;
+
+        double bw = Math.Max(16, view.Width);
+        double bh = Math.Max(16, view.Height);
+
+        var overlay = new Border
+        {
+            Child = new Image { Source = snap, Stretch = Stretch.Fill },
+            Width = bw,
+            Height = bh,
+            RenderTransformOrigin = new Point(0.5, 0.5),
+            RenderTransform = new ScaleTransform { ScaleX = 1, ScaleY = 1 },
+        };
+        Canvas.SetZIndex(overlay, 10000);
+        Canvas.SetLeft(overlay, cx - bw / 2);
+        Canvas.SetTop(overlay, cy - bh / 2);
+        _root.Children.Add(overlay);
+
+        var t = TimeSpan.FromMilliseconds(350);
+        var scale = (ScaleTransform)overlay.RenderTransform;
+        var sb = new Storyboard();
+        sb.Children.Add(MakeAnim(nameof(scale.ScaleX), scale, 1, 0.1, t));
+        sb.Children.Add(MakeAnim(nameof(scale.ScaleY), scale, 1, 0.1, t));
+        sb.Children.Add(MakeAnim(nameof(overlay.Opacity), overlay, 1, 0, t));
+        sb.Completed += (_, _) => _root.Children.Remove(overlay);
+        sb.Begin();
+    }
+
+    private static DoubleAnimation MakeAnim(string path, DependencyObject target, double from, double to, TimeSpan duration)
+    {
+        var a = new DoubleAnimation
+        {
+            From = from,
+            To = to,
+            Duration = duration,
+            EnableDependentAnimation = true,
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn },
+        };
+        Storyboard.SetTarget(a, target);
+        Storyboard.SetTargetProperty(a, path);
+        return a;
     }
 
     private static Color AccentColor(TaskWindow task)
@@ -291,11 +363,20 @@ public sealed class DockWindow : Window
         double top2 = Math.Max(2, top - h - 4);
         Canvas.SetLeft(_tooltip, left);
         Canvas.SetTop(_tooltip, top2);
+
+        // M6：悬停出 DWM 实时预览（最小化窗口无内容预览，跳过）。
+        if (!task.IsIconic && _visible && _hwnd != nint.Zero)
+        {
+            NativeMethods.GetWindowRect(_hwnd, out var wr);
+            double cxScreen = wr.Left + (x1 + x2) / 2;
+            _preview.ShowFor(task, wr.Bottom, cxScreen);
+        }
     }
 
     private void HideTooltip()
     {
         _tooltip.Visibility = Visibility.Collapsed;
+        _preview.Hide();
     }
 
     // ---- 右键菜单 ----
@@ -320,7 +401,7 @@ public sealed class DockWindow : Window
         _root.Children.Remove(view);
         _views.Remove(view);
         _map.Remove(view);
-        _tooltip.Visibility = Visibility.Collapsed;
+        HideTooltip();
         ReLayout(double.NegativeInfinity);
     }
 

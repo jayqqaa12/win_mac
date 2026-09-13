@@ -326,4 +326,43 @@ public static partial class NativeMethods
 
     [DllImport("user32.dll")]
     public static extern bool PostThreadMessage(uint idThread, uint msg, nint wParam, nint lParam);
+
+    // ---- M6：DWM 窗口预览缩略图 ----
+    [DllImport("dwmapi.dll")]
+    public static extern int DwmRegisterThumbnail(nint hwndDestination, nint hwndSource, out nint phThumbnailId);
+
+    [DllImport("dwmapi.dll")]
+    public static extern int DwmUpdateThumbnailProperties(nint hThumbnailId, ref DWM_THUMBNAIL_PROPERTIES ptnProperties);
+
+    [DllImport("dwmapi.dll")]
+    public static extern int DwmUnregisterThumbnail(nint hThumbnailId);
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct DWM_THUMBNAIL_PROPERTIES
+    {
+        public uint dwFlags;
+        public RECT rcDestination;
+        public RECT rcSource;
+        public byte opacity;
+        public int fVisible;
+        public int fSourceClientAreaOnly;
+    }
+
+    public const uint DWM_TNP_RECTDESTINATION = 0x00000001;
+    public const uint DWM_TNP_RECTSOURCE = 0x00000002;
+    public const uint DWM_TNP_OPACITY = 0x00000004;
+    public const uint DWM_TNP_VISIBLE = 0x00000008;
+    public const uint DWM_TNP_SOURCECLIENTAREAONLY = 0x00000010;
+
+    // ---- M6：最小化 genie 抓图 ----
+    [DllImport("user32.dll")]
+    public static extern bool PrintWindow(nint hwnd, nint hdcBlt, uint nFlags);
+
+    public const uint PW_RENDERFULLCONTENT = 0x00000002;
+
+    // ---- M8：多显示器枚举 ----
+    public delegate bool MonitorEnumProc(nint hMonitor, nint hdcMonitor, ref RECT lprcMonitor, nint lParam);
+
+    [DllImport("user32.dll")]
+    public static extern bool EnumDisplayMonitors(nint hdc, nint lprcClip, MonitorEnumProc lpfnEnum, nint dwData);
 }

@@ -21,4 +21,7 @@ public sealed class TaskWindow
     public string? ProcessPath { get; }
 
     public bool IsForeground => NativeMethods.GetForegroundWindow() == Hwnd;
+
+    /// <summary>窗口当前是否最小化（驱动 genie 动画与状态指示）。</summary>
+    public bool IsIconic => NativeMethods.IsIconic(Hwnd);
 }
