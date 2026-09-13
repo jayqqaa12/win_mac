@@ -14,7 +14,6 @@ public sealed class DockItem
     {
         PinPath = pinPath;
         Icon = icon;
-        Title = System.IO.Path.GetFileNameWithoutExtension(pinPath);
     }
 
     /// <summary>新建运行中的窗口项（未对应任何固定项）。</summary>
