@@ -429,3 +429,4 @@ public sealed class WidgetWindow : Window
             });
         }
     }
+}
