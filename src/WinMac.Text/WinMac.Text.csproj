@@ -11,4 +11,8 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WinMac.Core\WinMac.Core.csproj" />
+  </ItemGroup>
+
 </Project>
