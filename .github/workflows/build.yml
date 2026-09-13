@@ -31,6 +31,22 @@ jobs:
       - name: Publish (unpackaged · self-contained)
         run: dotnet publish src\WinMac.Shell\WinMac.Shell.csproj -c Release -p:Platform=x64 -r win-x64 --self-contained true -o publish -p:WindowsAppSDKSelfContained=true -p:WindowsPackageType=None
 
+      - name: Build native MacTypeHook DLL (CMake / MSVC x64)
+        shell: pwsh
+        run: |
+          cmake -S src\Native\MacTypeHook -B src\Native\MacTypeHook\build -A x64
+          cmake --build src\Native\MacTypeHook\build --config Release
+          Copy-Item src\Native\MacTypeHook\build\Release\MacTypeHook.dll publish\MacTypeHook.dll
+
+      - name: Publish font-hook installer (framework-dependent)
+        run: dotnet publish src\WinMac.Setup.Installer\WinMac.Setup.Installer.csproj -c Release -p:Platform=x64 -o publish-installer
+
+      - name: Merge installer + hook DLL into artifact
+        shell: pwsh
+        run: |
+          Copy-Item publish-installer\WinMac.Setup.Installer.exe publish\
+          Copy-Item src\Native\MacTypeHook\build\Release\MacTypeHook.dll publish\MacTypeHook.dll -Force
+
       - name: Compress artifact
         shell: pwsh
         run: Compress-Archive -Path publish\* -DestinationPath WinMac-x64.zip

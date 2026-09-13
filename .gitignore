@@ -25,6 +25,9 @@ BundleArtifacts/
 *.rsp
 *.jsp
 
+# === Native (CMake) build output ===
+src/Native/**/build/
+
 # === IntelliJ / JetBrains fine
 *.idea/
 
