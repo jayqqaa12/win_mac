@@ -7,14 +7,10 @@ public partial class App : Application
 {
     private const string SingleInstanceName = @"Local\WinMac.Shell.SingleInstance";
     private static Mutex? _mutex;
-    private Window? _window;
 
     public App()
     {
         InitializeComponent();
-
-        // 非打包模式下，让内容能跟随 Windows 亮/暗设置。
-        RequestedTheme = ApplicationTheme.Dark;
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
@@ -27,10 +23,8 @@ public partial class App : Application
             return;
         }
 
-        // 加载配置（M0 先确保 Core 集成可用，Dock 为此读取）。
+        // 载配置 → 引导(M1：应用主题并创建主窗口)。
         AppConfig config = ConfigStore.Load();
-
-        _window = new MainWindow(config);
-        _window.Activate();
+        new MainController(config).Launch();
     }
 }

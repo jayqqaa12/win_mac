@@ -24,6 +24,15 @@ public sealed class AppConfig
     /// <summary>浅色 / 深色 / 跟随系统。</summary>
     public string Theme { get; set; } = "System";
 
+    /// <summary>macOS 质感文字——gamma 曲线（典型 1.8 附近，越大越亮越淡）。</summary>
+    public double TextGamma { get; set; } = 1.8;
+
+    /// <summary>macOS 质感文字——对比度（0.0~1.5，越大字愈黑/愈实）。</summary>
+    public double TextContrast { get; set; } = 0.9;
+
+    /// <summary>macOS 质感文字——柔化度（0.0~1.0，越大边缘越柔、观感越轻）。</summary>
+    public double TextSoftness { get; set; } = 0.35;
+
     /// <summary>CPU/内存采样间隔（秒），0 关闭。</summary>
     public int SensorIntervalSeconds { get; set; } = 2;
 

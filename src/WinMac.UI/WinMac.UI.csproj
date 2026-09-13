@@ -1,22 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
-    <RootNamespace>WinMac.Shell</RootNamespace>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <RootNamespace>WinMac.UI</RootNamespace>
     <Platforms>x64</Platforms>
-    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-    <!-- WinUI 3 -->
+    <!-- WinUI 3 类库：控件 / 设置窗口 / 文本质感近似 都在这层 -->
     <UseWinUI>true</UseWinUI>
-    <!-- 非打包、自包含：免装运行时，单 exe 目录分发（最适合初版工具分发）-->
-    <WindowsPackageType>None</WindowsPackageType>
-    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-    <!-- 修复 CI 的 MSB4062 ExpandPriContent：切换到 MSIX/Appx 工具链以提供 PRI 生成任务（MS 官方修法）-->
+    <!-- 与 WinMac.Shell 相同的已验证构建开关：MSIX 工具链提供 PRI + 锁定 SDK 投影版本 -->
     <EnableMsixTooling>true</EnableMsixTooling>
-    <!-- 指定 Windows SDK.NET 投影版本，满足 WinAppSDK 最小版本要求（修复 CI 的 SDK.NET.Ref 报错）-->
     <WindowsSdkPackageVersion>10.0.26100.42</WindowsSdkPackageVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -31,7 +24,6 @@
   <ItemGroup>
     <ProjectReference Include="..\WinMac.Core\WinMac.Core.csproj" />
     <ProjectReference Include="..\WinMac.Text\WinMac.Text.csproj" />
-    <ProjectReference Include="..\WinMac.UI\WinMac.UI.csproj" />
   </ItemGroup>
 
 </Project>
