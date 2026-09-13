@@ -59,7 +59,7 @@ internal static partial class NativeMethods
     [DllImport("advapi32.dll", SetLastError = true)]
     private static extern int RegCloseKey(nint hKey);
 
-    private const nint HKEY_CURRENT_USER = unchecked((nint)0x80000001);
+    private static readonly nint HKEY_CURRENT_USER = unchecked((nint)0x80000001UL);
     private const int REG_SZ = 1;
     private const int KEY_WRITE = 0x20006;
     private const int KEY_QUERY_VALUE = 0x1;
