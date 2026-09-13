@@ -5,6 +5,7 @@ using WinMac.Core.Win32;
 using WinMac.Shell.Dock;
 using WinMac.Shell.Launchpad;
 using WinMac.Shell.Settings;
+using WinMac.Shell.Skins;
 using WinMac.Shell.Widgets;
 
 namespace WinMac.Shell;
@@ -17,6 +18,7 @@ public sealed class MainController
 {
     private readonly AppConfig _config;
     private readonly List<WidgetWindow> _widgets = new();
+    private readonly List<SkinHostWindow> _skins = new();
     private DockWindow? _dock;
     private LaunchpadWindow? _launchpad;
     private bool _launchpadOpen;
@@ -46,8 +48,33 @@ public sealed class MainController
         if (_config.WidgetsEnabled)
             LaunchWidgets();
 
+        // Rainmeter 式皮肤系统（每个显示器一个宿主窗口）。
+        LaunchSkins();
+
         MainWindow = new MainWindow(_config);
         MainWindow.Activate();
+    }
+
+    /// <summary>跨屏皮肤宿主：每块显示器建一个透明宿主窗口，承载可拖拽/缩放的皮肤卡片。</summary>
+    private void LaunchSkins()
+    {
+        if (_config.SkinLayouts is not { Count: > 0 })
+        {
+            _config.SkinLayouts = SkinParser.Defaults();
+            ConfigStore.Save(_config);
+        }
+
+        foreach (var monitor in SkinMonitor.GetMonitors())
+        {
+            var host = new SkinHostWindow(
+                _config,
+                monitor.Index,
+                monitor,
+                () => _config.SkinLayouts,
+                () => ConfigStore.Save(_config));
+            host.Activate();
+            _skins.Add(host);
+        }
     }
 
     /// <summary>在主屏右上角纵向排布四个小组件。</summary>

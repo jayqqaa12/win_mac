@@ -47,6 +47,23 @@ public sealed class AppConfig
 
     /// <summary>开机自启。</summary>
     public bool AutoStart { get; set; } = true;
+
+    /// <summary>Rainmeter式皮肤布局：各组件(时钟/CPU/内存)所在显示器、坐标与尺寸。</summary>
+    public List<SkinLayoutEntry> SkinLayouts { get; set; } = new();
+}
+
+/// <summary>单个皮肤组件的持久化布局。</summary>
+public sealed class SkinLayoutEntry
+{
+    public string Kind { get; set; } = "Clock"; // Clock / Cpu / Mem
+
+    /// <summary>所在显示器索引（0=主屏，按 EnumDisplayMonitors 顺序）。</summary>
+    public int Monitor { get; set; }
+
+    public double X { get; set; }
+    public double Y { get; set; }
+    public double W { get; set; }
+    public double H { get; set; }
 }
 
 /// <summary>将 <see cref="AppConfig"/> 持久化为 JSON。</summary>
