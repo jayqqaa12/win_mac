@@ -21,6 +21,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <!-- 允许 unsafe：WinAppSDK 的 WinRT Generic Instantiation 源生成器会生成非托管指针代码 -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
